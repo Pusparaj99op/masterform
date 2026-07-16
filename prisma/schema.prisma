@@ -1,0 +1,326 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum LocationType {
+  IN_PERSON
+  ONLINE
+  HYBRID
+}
+
+enum RegStatus {
+  OPEN
+  CLOSED
+  WAITLIST_ONLY
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  UNLISTED
+}
+
+enum QuestionType {
+  TEXT
+  TEXTAREA
+  SELECT
+  CHECKBOX
+  DATE
+  PHONE
+}
+
+enum RegStatus2 {
+  GOING
+  WAITLISTED
+  PENDING_APPROVAL
+  DECLINED
+  CANCELLED
+}
+
+enum PayStatus {
+  FREE
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+}
+
+enum BlastTarget {
+  ALL
+  GOING
+  WAITLISTED
+  PENDING_APPROVAL
+  CHECKED_IN
+}
+
+enum CouponType {
+  PERCENT
+  FIXED
+}
+
+// ─── USER ────────────────────────────────────────────────────────────────────
+model User {
+  id            String   @id @default(cuid())
+  clerkId       String?  @unique
+  email         String   @unique
+  name          String?
+  avatarUrl     String?
+  bio           String?
+  twitterHandle String?
+  websiteUrl    String?
+  timezone      String   @default("UTC")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  hostedEvents   Event[]        @relation("EventHost")
+  cohostedEvents EventCohost[]
+  registrations  Registration[]
+  calendars      Calendar[]
+  stripeAccount  StripeAccount?
+
+  @@index([email])
+}
+
+// ─── STRIPE CONNECT ──────────────────────────────────────────────────────────
+model StripeAccount {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  stripeAccountId    String   @unique
+  chargesEnabled     Boolean  @default(false)
+  payoutsEnabled     Boolean  @default(false)
+  onboardingComplete Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// ─── CALENDAR ────────────────────────────────────────────────────────────────
+model Calendar {
+  id          String   @id @default(cuid())
+  userId      String
+  slug        String   @unique
+  name        String
+  description String?
+  coverUrl    String?
+  logoUrl     String?
+  themeColor  String   @default("#5B5FEF")
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id])
+  events Event[]
+
+  @@index([slug])
+}
+
+// ─── EVENT ───────────────────────────────────────────────────────────────────
+model Event {
+  id                 String       @id @default(cuid())
+  slug               String       @unique
+  hostId             String
+  calendarId         String?
+  title              String
+  description        String?
+  coverImageUrl      String?
+  coverImageR2Key    String?
+  startsAt           DateTime
+  endsAt             DateTime?
+  timezone           String       @default("UTC")
+  isAllDay           Boolean      @default(false)
+  recurrenceRule     String?
+  locationType       LocationType @default(IN_PERSON)
+  locationName       String?
+  locationAddress    String?
+  locationLat        Float?
+  locationLng        Float?
+  onlineUrl          String?
+  onlineNotes        String?
+  registrationStatus RegStatus    @default(OPEN)
+  capacity           Int?
+  waitlistEnabled    Boolean      @default(true)
+  groupRegistration  Boolean      @default(false)
+  maxGroupSize       Int?         @default(5)
+  requiresApproval   Boolean      @default(false)
+  visibility         Visibility   @default(PUBLIC)
+  publishedAt        DateTime?
+  metaTitle          String?
+  metaDescription    String?
+  viewCount          Int          @default(0)
+  platformFeeRate    Float        @default(0)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  host          User           @relation("EventHost", fields: [hostId], references: [id])
+  calendar      Calendar?      @relation(fields: [calendarId], references: [id])
+  cohosts       EventCohost[]
+  ticketTypes   TicketType[]
+  registrations Registration[]
+  regQuestions  RegQuestion[]
+  blasts        Blast[]
+  pageViews     PageView[]
+  coupons       Coupon[]
+
+  @@index([hostId])
+  @@index([startsAt])
+  @@index([slug])
+}
+
+// ─── EVENT COHOST ────────────────────────────────────────────────────────────
+model EventCohost {
+  id         String  @id @default(cuid())
+  eventId    String
+  userId     String
+  canCheckIn Boolean @default(true)
+  canManage  Boolean @default(false)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, userId])
+}
+
+// ─── TICKET TYPE ─────────────────────────────────────────────────────────────
+model TicketType {
+  id              String    @id @default(cuid())
+  eventId         String
+  name            String
+  description     String?
+  price           Float     @default(0)
+  currency        String    @default("INR")
+  quantity        Int?
+  quantitySold    Int       @default(0)
+  maxPerOrder     Int       @default(10)
+  minPerOrder     Int       @default(1)
+  salesStartAt    DateTime?
+  salesEndAt      DateTime?
+  isVisible       Boolean   @default(true)
+  sortOrder       Int       @default(0)
+  stripePriceId   String?
+  stripeProductId String?
+  createdAt       DateTime  @default(now())
+
+  event         Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  registrations Registration[]
+
+  @@index([eventId])
+}
+
+// ─── REG QUESTION ────────────────────────────────────────────────────────────
+model RegQuestion {
+  id         String       @id @default(cuid())
+  eventId    String
+  label      String
+  type       QuestionType @default(TEXT)
+  options    String[]
+  isRequired Boolean      @default(false)
+  sortOrder  Int          @default(0)
+
+  event   Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  answers RegAnswer[]
+}
+
+// ─── REGISTRATION ────────────────────────────────────────────────────────────
+model Registration {
+  id                    String     @id @default(cuid())
+  eventId               String
+  userId                String?
+  ticketTypeId          String
+  guestName             String?
+  guestEmail            String?
+  status                RegStatus2 @default(GOING)
+  checkInAt             DateTime?
+  checkInBy             String?
+  paymentStatus         PayStatus  @default(FREE)
+  stripeSessionId       String?
+  stripePaymentIntentId String?
+  amountPaid            Float?
+  currency              String     @default("INR")
+  refundedAt            DateTime?
+  refundAmount          Float?
+  referralCode          String     @unique @default(cuid())
+  referredBy            String?
+  referralCount         Int        @default(0)
+  utmSource             String?
+  utmMedium             String?
+  utmCampaign           String?
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
+
+  event      Event       @relation(fields: [eventId], references: [id])
+  user       User?       @relation(fields: [userId], references: [id])
+  ticketType TicketType  @relation(fields: [ticketTypeId], references: [id])
+  answers    RegAnswer[]
+
+  @@index([eventId])
+  @@index([guestEmail])
+  @@index([referralCode])
+}
+
+// ─── REG ANSWER ──────────────────────────────────────────────────────────────
+model RegAnswer {
+  id             String @id @default(cuid())
+  registrationId String
+  questionId     String
+  value          String
+
+  registration Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  question     RegQuestion  @relation(fields: [questionId], references: [id])
+}
+
+// ─── BLAST ───────────────────────────────────────────────────────────────────
+model Blast {
+  id             String      @id @default(cuid())
+  eventId        String
+  senderId       String
+  subject        String?
+  body           String
+  sentTo         BlastTarget @default(GOING)
+  sentAt         DateTime    @default(now())
+  recipientCount Int         @default(0)
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+// ─── COUPON ──────────────────────────────────────────────────────────────────
+model Coupon {
+  id             String     @id @default(cuid())
+  eventId        String
+  code           String
+  type           CouponType @default(PERCENT)
+  value          Float
+  maxUses        Int?
+  usedCount      Int        @default(0)
+  expiresAt      DateTime?
+  isActive       Boolean    @default(true)
+  stripeCouponId String?
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, code])
+}
+
+// ─── PAGE VIEW ───────────────────────────────────────────────────────────────
+model PageView {
+  id       String   @id @default(cuid())
+  eventId  String
+  viewedAt DateTime @default(now())
+  source   String?
+  country  String?
+  device   String?
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId, viewedAt])
+}
