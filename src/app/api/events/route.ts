@@ -22,6 +22,9 @@ const createEventSchema = z.object({
   visibility: z.enum(["PUBLIC", "PRIVATE", "UNLISTED"]).default("PUBLIC"),
   calendarId: z.string().optional(),
   slug: z.string().optional(),
+  requiresApproval: z.boolean().default(false),
+  waitlistEnabled: z.boolean().default(true),
+  groupRegistration: z.boolean().default(false),
 });
 
 // GET /api/events — list events for current user
@@ -87,7 +90,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: err.errors }, { status: 422 });
+      return NextResponse.json({ error: "Validation error", details: err.issues }, { status: 422 });
     }
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
