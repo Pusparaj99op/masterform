@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
-import { ratelimit } from "@/lib/ratelimit";
+import { registrationRatelimit } from "@/lib/ratelimit";
 
 const schema = z.object({
   eventId: z.string(),
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   try {
     // Rate limit
     const ip = req.headers.get("x-forwarded-for") ?? "anonymous";
-    const { success } = await ratelimit.limit(ip);
+    const { success } = await registrationRatelimit.limit(ip);
     if (!success) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
             answers: {
               create: answers.map((a) => ({
                 questionId: a.questionId,
-                answer: a.answer,
+                value: a.answer,
               })),
             },
           },
