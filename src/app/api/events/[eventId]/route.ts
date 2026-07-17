@@ -46,7 +46,7 @@ const patchSchema = z.object({
   capacity: z.number().int().positive().optional().nullable(),
   registrationStatus: z.enum(["OPEN", "CLOSED", "WAITLIST_ONLY"]).optional(),
   waitlistEnabled: z.boolean().optional(),
-  requireApproval: z.boolean().optional(),
+  requiresApproval: z.boolean().optional(),
   groupRegistration: z.boolean().optional(),
   visibility: z.enum(["PUBLIC", "PRIVATE", "UNLISTED"]).optional(),
   publishedAt: z.string().datetime().optional().nullable(),
@@ -84,7 +84,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: err.errors }, { status: 422 });
+      return NextResponse.json({ error: "Validation error", details: err.issues }, { status: 422 });
     }
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
