@@ -33,20 +33,21 @@ export async function POST(
     const body = await req.json();
     const data = blastSchema.parse(body);
 
-    // Get target registrations
-    const statusFilter: Record<string, string | string[]> = {
-      ALL: ["GOING", "WAITLISTED", "PENDING_APPROVAL"],
-      GOING: "GOING",
-      WAITLISTED: "WAITLISTED",
-      PENDING_APPROVAL: "PENDING_APPROVAL",
-      CHECKED_IN: "GOING",
-    };
+    // Get target registrations - build proper enum filter
+    type RegStatus2 = "GOING" | "WAITLISTED" | "PENDING_APPROVAL" | "DECLINED" | "CANCELLED";
+    
+    let statusFilter: RegStatus2 | { in: RegStatus2[] };
+    if (data.sentTo === "ALL") {
+      statusFilter = { in: ["GOING", "WAITLISTED", "PENDING_APPROVAL"] };
+    } else if (data.sentTo === "CHECKED_IN") {
+      statusFilter = "GOING";
+    } else {
+      statusFilter = data.sentTo as RegStatus2;
+    }
 
     const where = {
       eventId,
-      status: Array.isArray(statusFilter[data.sentTo])
-        ? { in: statusFilter[data.sentTo] as string[] }
-        : (statusFilter[data.sentTo] as string),
+      status: statusFilter,
       ...(data.sentTo === "CHECKED_IN" ? { checkInAt: { not: null } } : {}),
     };
 
@@ -55,12 +56,19 @@ export async function POST(
       select: {
         guestEmail: true,
         guestName: true,
-        user: { select: { email: true, name: true } },
+        userId: true,
       },
     });
 
+    // Fetch emails for user-linked registrations
+    const userIds = registrations.map((r) => r.userId).filter(Boolean) as string[];
+    const users = userIds.length > 0
+      ? await db.user.findMany({ where: { id: { in: userIds } }, select: { id: true, email: true, name: true } })
+      : [];
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
     const emails = registrations
-      .map((r) => r.guestEmail ?? r.user?.email)
+      .map((r) => r.guestEmail ?? (r.userId ? userMap.get(r.userId)?.email : undefined))
       .filter(Boolean) as string[];
 
     // Send emails in batches of 50 via Resend batch API
@@ -108,7 +116,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: err.errors }, { status: 422 });
+      return NextResponse.json({ error: "Validation error", details: err.issues }, { status: 422 });
     }
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
