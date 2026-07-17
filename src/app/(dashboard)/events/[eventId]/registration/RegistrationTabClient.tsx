@@ -25,7 +25,7 @@ interface Event {
   registrationStatus: string;
   capacity: number | null;
   waitlistEnabled: boolean;
-  requireApproval: boolean;
+  requiresApproval: boolean;
   groupRegistration: boolean;
   ticketTypes: TicketType[];
   regQuestions: RegQuestion[];
@@ -36,7 +36,7 @@ export default function RegistrationTabClient({ event }: { event: Event }) {
     registrationStatus: event.registrationStatus,
     capacity: event.capacity?.toString() ?? "",
     waitlistEnabled: event.waitlistEnabled,
-    requireApproval: event.requireApproval,
+    requiresApproval: event.requiresApproval,
     groupRegistration: event.groupRegistration,
   });
   const [saving, setSaving] = useState(false);
@@ -51,7 +51,7 @@ export default function RegistrationTabClient({ event }: { event: Event }) {
         registrationStatus: form.registrationStatus,
         capacity: form.capacity ? parseInt(form.capacity) : null,
         waitlistEnabled: form.waitlistEnabled,
-        requireApproval: form.requireApproval,
+        requiresApproval: form.requiresApproval,
         groupRegistration: form.groupRegistration,
       }),
     });
@@ -103,7 +103,7 @@ export default function RegistrationTabClient({ event }: { event: Event }) {
         </div>
         <div className="space-y-3 mt-4">
           {[
-            { key: "requireApproval", label: "Require approval", desc: "Manually approve each registration request" },
+            { key: "requiresApproval", label: "Require approval", desc: "Manually approve each registration request" },
             { key: "waitlistEnabled", label: "Enable waitlist", desc: "Allow guests to join a waitlist when full" },
             { key: "groupRegistration", label: "Allow group registration", desc: "Let one person register multiple guests" },
           ].map((opt) => (
