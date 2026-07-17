@@ -103,7 +103,7 @@ export async function POST(req: Request) {
           ticketTypeId: firstTicketTypeId!,
           guestName: data.guestInfo.name,
           guestEmail: data.guestInfo.email,
-          status: event.requireApproval ? "PENDING_APPROVAL" : "GOING",
+          status: event.requiresApproval ? "PENDING_APPROVAL" : "GOING",
           paymentStatus: "FREE",
           utmSource: data.utmSource,
           utmMedium: data.utmMedium,
@@ -186,7 +186,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ sessionId: session.id, url: session.url });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: err.errors }, { status: 422 });
+      return NextResponse.json({ error: "Validation error", details: err.issues }, { status: 422 });
     }
     console.error("Checkout error:", err);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
