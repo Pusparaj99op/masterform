@@ -24,10 +24,15 @@ export default async function BlastsPage({
 
   if (!event || event.hostId !== user.id) notFound();
 
+  const serializedBlasts = event.blasts.map((b) => ({
+    ...b,
+    sentAt: b.sentAt.toISOString(),
+  }));
+
   return (
     <BlastsTab
       eventId={eventId}
-      initialBlasts={event.blasts}
+      initialBlasts={serializedBlasts}
       hostName={user.name}
       hostAvatarUrl={user.avatarUrl}
     />
