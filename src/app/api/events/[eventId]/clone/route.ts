@@ -47,7 +47,7 @@ export async function POST(
         onlineUrl: source.onlineUrl,
         capacity: source.capacity,
         waitlistEnabled: source.waitlistEnabled,
-        requireApproval: source.requireApproval,
+        requiresApproval: source.requiresApproval,
         groupRegistration: source.groupRegistration,
         maxGroupSize: source.maxGroupSize,
         visibility: "PRIVATE", // Start cloned event as private
