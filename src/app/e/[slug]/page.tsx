@@ -111,7 +111,7 @@ export default async function PublicEventPage({
     cohosts: event.cohosts,
     ticketTypes: event.ticketTypes,
     registrations: event.registrations,
-    blasts: event.blasts,
+    blasts: event.blasts.map((b) => ({ id: b.id, body: b.body, sentAt: b.sentAt.toISOString() })),
     goingCount: event._count.registrations,
     dateString,
     isFree,
