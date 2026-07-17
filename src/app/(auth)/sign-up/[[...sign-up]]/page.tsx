@@ -25,20 +25,6 @@ export default function SignUpPage() {
           otpCodeFieldInput:
             "bg-[var(--bg-muted)] border-[var(--bg-border)] text-[var(--text-primary)] rounded-lg",
         },
-        layout: {
-          socialButtonsPlacement: "top",
-          privacyPageUrl: "/privacy",
-          termsPageUrl: "/terms",
-        },
-        variables: {
-          colorBackground: "var(--bg-surface)",
-          colorText: "var(--text-primary)",
-          colorTextSecondary: "var(--text-secondary)",
-          colorPrimary: "var(--accent-primary)",
-          colorDanger: "var(--accent-danger)",
-          borderRadius: "12px",
-          fontFamily: "var(--font-inter), sans-serif",
-        },
       }}
     />
   );
