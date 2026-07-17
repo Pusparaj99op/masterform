@@ -46,7 +46,7 @@ export default async function RegisterPage({
         dateString,
         ticketTypes: event.ticketTypes,
         regQuestions: event.regQuestions,
-        requireApproval: event.requireApproval,
+        requireApproval: event.requiresApproval,
       }}
     />
   );
