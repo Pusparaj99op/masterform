@@ -28,20 +28,6 @@ export default function SignInPage() {
           alertText: "text-[var(--accent-danger)]",
           alertIcon: "text-[var(--accent-danger)]",
         },
-        layout: {
-          socialButtonsPlacement: "top",
-          privacyPageUrl: "/privacy",
-          termsPageUrl: "/terms",
-        },
-        variables: {
-          colorBackground: "var(--bg-surface)",
-          colorText: "var(--text-primary)",
-          colorTextSecondary: "var(--text-secondary)",
-          colorPrimary: "var(--accent-primary)",
-          colorDanger: "var(--accent-danger)",
-          borderRadius: "12px",
-          fontFamily: "var(--font-inter), sans-serif",
-        },
       }}
     />
   );
