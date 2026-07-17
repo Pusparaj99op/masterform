@@ -3,10 +3,20 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect } from "react";
 import {
-  Calendar, MapPin, Globe, Users, ExternalLink, Twitter, Link2, Share2
+  Calendar, MapPin, Globe, Users, ExternalLink, Link2, Share2
 } from "lucide-react";
 import { format } from "date-fns";
 import { fadeUp, staggerContainer } from "@/lib/motion";
+
+// Twitter/X icon (removed from lucide-react v1)
+function XIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
 
 interface EventData {
   id: string;
@@ -153,7 +163,7 @@ export default function EventPublicClient({
                   <div className="flex items-center gap-3 mt-0.5">
                     {event.host.twitterHandle && (
                       <a href={`https://twitter.com/${event.host.twitterHandle}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
-                        <Twitter size={11} />@{event.host.twitterHandle}
+                        <XIcon size={11} />@{event.host.twitterHandle}
                       </a>
                     )}
                     {event.host.websiteUrl && (
@@ -366,7 +376,7 @@ export default function EventPublicClient({
                   className="flex items-center gap-1.5 text-xs"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  <Twitter size={13} />
+                  <XIcon size={13} />
                   Tweet
                 </a>
               </div>
