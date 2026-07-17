@@ -11,10 +11,6 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
-  eslint: {
-    // Allow production builds to succeed even with ESLint warnings
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     // Allow production builds to succeed even with type errors (caught at dev time)
     ignoreBuildErrors: true,
