@@ -31,7 +31,7 @@ export default function CreateEventPage() {
     locationAddress: "",
     onlineUrl: "",
     capacity: "",
-    requireApproval: false,
+    requiresApproval: false,
     waitlistEnabled: true,
     visibility: "PUBLIC" as "PUBLIC" | "PRIVATE",
     ticketName: "General Admission",
@@ -61,7 +61,7 @@ export default function CreateEventPage() {
           locationAddress: form.locationAddress || undefined,
           onlineUrl: form.onlineUrl || undefined,
           capacity: form.capacity ? parseInt(form.capacity) : undefined,
-          requireApproval: form.requireApproval,
+          requiresApproval: form.requiresApproval,
           waitlistEnabled: form.waitlistEnabled,
           visibility: publish ? "PUBLIC" : "PRIVATE",
         }),
@@ -249,7 +249,7 @@ export default function CreateEventPage() {
             </div>
             <div className="space-y-3">
               {[
-                { key: "requireApproval", label: "Require Approval", desc: "Manually approve each registration" },
+                { key: "requiresApproval", label: "Require Approval", desc: "Manually approve each registration" },
                 { key: "waitlistEnabled", label: "Enable Waitlist", desc: "Allow guests to join waitlist when full" },
               ].map((opt) => (
                 <div key={opt.key} className="flex items-center justify-between p-3 card">
