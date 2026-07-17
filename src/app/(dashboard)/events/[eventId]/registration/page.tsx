@@ -31,7 +31,7 @@ export default async function RegistrationPage({
         registrationStatus: event.registrationStatus,
         capacity: event.capacity,
         waitlistEnabled: event.waitlistEnabled,
-        requireApproval: event.requireApproval,
+        requiresApproval: event.requiresApproval,
         groupRegistration: event.groupRegistration,
         ticketTypes: event.ticketTypes,
         regQuestions: event.regQuestions,
